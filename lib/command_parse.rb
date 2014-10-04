@@ -13,7 +13,7 @@ class Parser
                 args: matches['args']
             }
         else
-            raise "Invalid command string #{string}"
+            puts "Invalid command string #{string}"
         end
     end
 end
