@@ -2,6 +2,8 @@ require 'sinatra'
 require 'twilio-ruby'
 require 'yaml'
 
+require './lib/command_parse'
+
 get '/' do
     'Hi'
 end
@@ -26,9 +28,22 @@ get '/send_sms/:name' do |name|
     'You sent a message'
 end
 
+# Eat the post request from twilio
+# FIXME: Need a way to lock this down? User-agent?
 post '/twil/received' do
     
-    p params[:body]
+    message = params['Body'].strip
 
+    parsed = Parser.parse(message)
+
+    command = parsed[:command]
+    args = parsed[:args]
+    
+    case command
+        when 'weather'
+            redirect '/send_sms/the weather is good'
+        else
+            puts "Command #{command} not found"
+    end
     'ok'
 end
