@@ -2,14 +2,19 @@ require 'sinatra'
 require 'twilio-ruby'
 require 'wolfram'
 require 'yaml'
+require 'json'
+require 'net/http'
 
 require './lib/command_parse'
+
 
 config = YAML.load_file('config.yaml')
 @@account_sid=config['account']['account_sid']
 @@auth_token=config['account']['auth_token']
 @@to_number=config['to']
 @@from_number=config['from']
+
+@@absolute_zero = 273.15
 
 get '/' do
   'Hi'
@@ -24,6 +29,10 @@ get '/wolfram/:query' do |query|
   get_wolfram(query)
 end
 
+get '/weather/:query' do |query|
+  get_weather(query)
+end
+
 # Eat the post request from twilio
 # FIXME: Need a way to lock this down? User-agent?
 post '/twil/received' do
@@ -36,7 +45,8 @@ post '/twil/received' do
     
     case command
         when 'weather'
-          puts 'the weather is nice'
+          weather = get_weather(args)
+          send_sms(weather, from)
         when 'wolfram'
           wolfram_result = get_wolfram(args)
           send_sms(wolfram_result, from)
@@ -62,4 +72,20 @@ def get_wolfram(query)
   main_result = hash[:pods]["Result"]
   main_result = "Sorry, no answer available" unless main_result
   main_result
+end
+
+def get_weather(query)
+  req = Net::HTTP.get('api.openweathermap.org', "/data/2.5/weather?q=#{query}")
+  res = JSON.parse(req)
+
+  p res
+
+  weather_description = res['weather'][0]['description']
+  # Convert absolute zero to Celsius
+  temperature = (res['main']['temp'] - @@absolute_zero).to_i
+  wind = res['wind']['speed']
+
+  response = "#{query.capitalize} has temperatures of #{temperature}C with wind speeds of #{wind}mph and #{weather_description.downcase}."
+
+  response
 end
