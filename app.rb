@@ -38,7 +38,7 @@ post '/twil/received' do
         when 'weather'
           puts 'the weather is nice'
         when 'wolfram'
-          wolfram_result = get_wolfram(args.join(' '))
+          wolfram_result = get_wolfram(args)
           send_sms(wolfram_result, from)
         else
           puts "Command #{command} not found"

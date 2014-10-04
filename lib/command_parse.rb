@@ -1,5 +1,5 @@
 class Parser
-    @matcher = /#(?<command>\w+)(?<args>(\s?\w+)*)/
+    @matcher = /#(?<command>\w+)(?<args>.*)/
 
     # Implementing classes should implement this 
     #
@@ -10,7 +10,7 @@ class Parser
         if matches
             { 
                 command: matches['command'], 
-                args: matches['args'].strip.split(' ')
+                args: matches['args']
             }
         else
             raise "Invalid command string #{string}"
