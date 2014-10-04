@@ -3,7 +3,6 @@ require 'twilio-ruby'
 require 'yaml'
 
 get '/' do
-
     'Hi'
 end
 
@@ -25,4 +24,11 @@ get '/send_sms/:name' do |name|
     )
 
     'You sent a message'
+end
+
+post '/twil/received' do
+    
+    p params[:body]
+
+    'ok'
 end
