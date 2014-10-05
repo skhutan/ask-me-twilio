@@ -27,6 +27,7 @@ get '/voicemail' do
       d.Client 'Calum'
     end
   end
+  response.text
 end
 
 get '/callme' do
