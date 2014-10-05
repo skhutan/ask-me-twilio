@@ -20,22 +20,22 @@ get '/' do
   "Hi"
 end
 
-get '/voicemail' do
+post '/voicemail/:message' do |message|
   response = Twilio::TwiML::Response.new do |r|
-    r.Say 'You have one MESSAGE... BEEP!!!', voice: 'woman'
+    r.Say message, voice: 'woman'
     r.Dial callerId: @@to_number do |d|
-      d.Client 'Calum'
+      d.Client 'Inquisitor'
     end
   end
   response.text
 end
 
-get '/callme' do
+def call_me(message)
   @call = @@client.account.calls.create(
   from: @@from_number, # From your Twilio number
   to: @@to_number, # To any number
   # Fetch instructions from this URL when the call connects
-  url: 'http://mlh.homelinen.org/voicemail'
+  url: %{http://mlh.homelinen.org/voicemail/#{message}}
 )
 end
 
@@ -68,7 +68,11 @@ post '/twil/received' do
           send_sms(weather, from)
         when 'wolfram'
           wolfram_result = get_wolfram(args)
-          send_sms(wolfram_result, from)
+          if wolfram_result == "Sorry, no answer available"
+            send_sms(wolfram_result, from)
+          else
+            call_me(wolfram_result)
+          end
         else
           puts "Command #{command} not found"
     end
