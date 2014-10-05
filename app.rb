@@ -7,17 +7,35 @@ require 'net/http'
 
 require './lib/command_parse'
 
-
 config = YAML.load_file('config.yaml')
 @@account_sid=config['account']['account_sid']
 @@auth_token=config['account']['auth_token']
 @@to_number=config['to']
 @@from_number=config['from']
+@@client = Twilio::REST::Client.new @@account_sid, @@auth_token
 
 @@absolute_zero = 273.15
 
 get '/' do
-  'Hi'
+  "Hi"
+end
+
+get '/voicemail' do
+  response = Twilio::TwiML::Response.new do |r|
+    r.Say 'You have one MESSAGE... BEEP!!!', voice: 'woman'
+    r.Dial callerId: @@to_number do |d|
+      d.Client 'Calum'
+    end
+  end
+end
+
+get '/callme' do
+  @call = @@client.account.calls.create(
+  from: @@from_number, # From your Twilio number
+  to: @@to_number, # To any number
+  # Fetch instructions from this URL when the call connects
+  url: 'http://mlh.homelinen.org/voicemail'
+)
 end
 
 get '/send_sms/:name' do |name|
@@ -36,9 +54,9 @@ end
 # Eat the post request from twilio
 # FIXME: Need a way to lock this down? User-agent?
 post '/twil/received' do
-    message = params['Body'].strip
-    from = params["From"]
-    parsed = Parser.parse(message)
+  message = params['Body'].strip
+  from = params["From"]
+  parsed = Parser.parse(message)
 
     command = parsed[:command]
     args = parsed[:args]
@@ -57,7 +75,6 @@ post '/twil/received' do
 end
 
 def send_sms(message, phone_number)
-  @@client = Twilio::REST::Client.new @@account_sid, @@auth_token
   @@client.account.messages.create(
     to: phone_number,
     from: @@from_number,
