@@ -22,7 +22,7 @@ end
 
 post '/voicemail/:message' do |message|
   response = Twilio::TwiML::Response.new do |r|
-    r.Say message, voice: 'woman'
+    r.Say message, voice: 'alice', language: 'en-GB'
     r.Dial callerId: @@to_number do |d|
       d.Client 'Inquisitor'
     end
@@ -92,7 +92,7 @@ def get_wolfram(query)
   # to see the result as a hash of pods and assumptions:
   hash = Wolfram::HashPresenter.new(result).to_hash
   main_result = hash[:pods]["Result"]
-  main_result = "Sorry, no answer available" unless main_result
+  main_result = "Sorry, no answer available" if main_result.nil? or main_result[0] == '(data not available)'
   main_result
 end
 
