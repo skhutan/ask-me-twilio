@@ -71,7 +71,7 @@ post '/twil/received' do
       if wolfram_result == "Sorry, no answer available"
         send_sms(wolfram_result, from)
       else
-        call_me(wolfram_result)
+        call_me(wolfram_result.join(' '))
       end
     else
       puts "Command #{command} not found"
