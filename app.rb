@@ -35,7 +35,7 @@ def call_me(message)
   from: @@from_number, # From your Twilio number
   to: @@to_number, # To any number
   # Fetch instructions from this URL when the call connects
-  url: %{http://mlh.homelinen.org/voicemail/#{message}}
+  url: %{http://mlh.homelinen.org/voicemail/#{CGI.escape(message)}}
 )
 end
 
