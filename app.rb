@@ -59,24 +59,24 @@ post '/twil/received' do
   from = params["From"]
   parsed = Parser.parse(message)
 
-    command = parsed[:command]
-    args = parsed[:args]
-    
-    case command
-        when 'weather'
-          weather = get_weather(args)
-          send_sms(weather, from)
-        when 'wolfram'
-          wolfram_result = get_wolfram(args)
-          if wolfram_result == "Sorry, no answer available"
-            send_sms(wolfram_result, from)
-          else
-            call_me(wolfram_result)
-          end
-        else
-          puts "Command #{command} not found"
-    end
-    'ok'
+  command = parsed[:command]
+  args = parsed[:args]
+  
+  case command
+    when 'weather'
+      weather = get_weather(args)
+      send_sms(weather, from)
+    when 'wolfram'
+      wolfram_result = get_wolfram(args)
+      if wolfram_result == "Sorry, no answer available"
+        send_sms(wolfram_result, from)
+      else
+        call_me(wolfram_result)
+      end
+    else
+      puts "Command #{command} not found"
+  end
+  'ok'
 end
 
 def send_sms(message, phone_number)
@@ -100,14 +100,10 @@ def get_weather(query)
   req = Net::HTTP.get('api.openweathermap.org', "/data/2.5/weather?q=#{query}")
   res = JSON.parse(req)
 
-  p res
-
   weather_description = res['weather'][0]['description']
   # Convert absolute zero to Celsius
   temperature = (res['main']['temp'] - @@absolute_zero).to_i
   wind = res['wind']['speed']
 
-  response = "#{query.capitalize} has temperatures of #{temperature}C with wind speeds of #{wind}mph and #{weather_description.downcase}."
-
-  response
+  "#{query.capitalize} has temperatures of #{temperature}C with wind speeds of #{wind}mph and #{weather_description.downcase}."
 end
