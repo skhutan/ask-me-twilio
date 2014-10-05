@@ -35,7 +35,7 @@ def call_me(message)
   from: @@from_number, # From your Twilio number
   to: @@to_number, # To any number
   # Fetch instructions from this URL when the call connects
-  url: %{http://mlh.homelinen.org/voicemail/#{message}}
+  url: %{http://mlh.homelinen.org/voicemail/#{CGI.escape(message)}}
 )
 end
 
@@ -71,7 +71,7 @@ post '/twil/received' do
           if wolfram_result == "Sorry, no answer available"
             send_sms(wolfram_result, from)
           else
-            call_me(wolfram_result)
+            call_me(wolfram_result.join(' '))
           end
         else
           puts "Command #{command} not found"
